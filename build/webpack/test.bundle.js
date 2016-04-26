@@ -74,7 +74,7 @@
 	
 	var defaults = {
 		templ: {
-			picker: '\n\t\t\t<div class="datepicker">\n\t\t\t\t<div class="datepicker-heading">\n\t\t\t\t\t<a href="javascript:;" class="datepicker-prev">&lt;</a>\n\t\t\t\t\t<span class="datepicker-screen"></span>\n\t\t\t\t\t<a href="javascript:;" class="datepicker-next">&gt;</a>\n\t\t\t\t</div>\n\t\t\t\t<div class="datepicker-body"></div>\n\t\t\t</div>\n\t\t',
+			picker: '\n\t\t\t<div class="datepicker">\n\t\t\t\t<div class="datepicker-heading">\n\t\t\t\t\t<a href="javascript:;" class="prev">&lt;</a>\n\t\t\t\t\t<span class="datepicker-screen"></span>\n\t\t\t\t\t<a href="javascript:;" class="next">&gt;</a>\n\t\t\t\t</div>\n\t\t\t\t<div class="datepicker-body"></div>\n\t\t\t</div>\n\t\t',
 			year: '\n\t\t\t<table class="datepicker-year">\n\t\t\t\t<tbody>{0}</tbody>\n\t\t\t</table>\n\t\t',
 			month: '\n\t\t\t<table class="datepicker-month">\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>一月</td>\n\t\t\t\t\t\t<td>二月</td>\n\t\t\t\t\t\t<td>三月</td>\n\t\t\t\t\t\t<td>四月</td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>五月</td>\n\t\t\t\t\t\t<td>六月</td>\n\t\t\t\t\t\t<td>七月</td>\n\t\t\t\t\t\t<td>八月</td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>九月</td>\n\t\t\t\t\t\t<td>十月</td>\n\t\t\t\t\t\t<td>十一月</td>\n\t\t\t\t\t\t<td>十二月</td>\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n\t\t',
 			day: '\n\t\t\t<table class="datepicker-day">\n\t\t\t\t<thead>\n\t\t\t\t\t<tr>{0}</tr>\n\t\t\t\t</thead>\n\t\t\t\t<tbody>\n\t\t\t\t\t{1}\n\t\t\t\t</tbody>\n\t\t\t</table>\n\t\t'
@@ -123,8 +123,8 @@
 	}
 	
 	// 获取日期对象
-	function getDateObj(time) {
-		var date = new Date();
+	function getDateObj(str) {
+		// var date = new Date;
 		/*var arr = time.split(' '),
 	 		arr2;
 	 for (let i = 0; i < arr.length; i++) {
@@ -160,7 +160,8 @@
 	 		}
 	 	}
 	 }*/
-		return date;
+	
+		return new Date(str);
 	}
 	
 	var DatePicker = function (_BaseMethod) {
@@ -193,10 +194,15 @@
 			key: 'setup',
 			value: function setup() {
 				if (this.el) {
-					this.selectDate = getDateObj(this.defaultDate);
+					if (this.defaultDate) {
+						if (this.defaultDate == 'now') {
+							this.selectDate = new Date();
+						}
+						this.outputDate();
+					}
+	
 					// this.tempDate = this.selectDate;
 					this.type = 'day';
-					this.outputDate();
 					this.events();
 				}
 			}
@@ -214,7 +220,7 @@
 		}, {
 			key: 'setScreen',
 			value: function setScreen() {
-				this.screen.innerHTML = (0, _util.dateFormat)('yyyy年MM月', this.selectDate);
+				this.screen.innerHTML = (0, _util.dateFormat)('yyyy年MM月', this.tempDate);
 			}
 	
 			// 创建picker
@@ -223,8 +229,8 @@
 			key: 'create',
 			value: function create() {
 				this.picker = (0, _util.parseDOM)(defaults.templ.picker).children[0];
-				this.prev = (0, _util.getDOM)('.datepicker-prev', this.picker)[0];
-				this.next = (0, _util.getDOM)('.datepicker-next', this.picker)[0];
+				this.prev = (0, _util.getDOM)('.prev', this.picker)[0];
+				this.next = (0, _util.getDOM)('.next', this.picker)[0];
 				this.screen = (0, _util.getDOM)('.datepicker-screen', this.picker)[0];
 				this.body = (0, _util.getDOM)('.datepicker-body', this.picker)[0];
 				document.body.appendChild(this.picker);
@@ -338,9 +344,9 @@
 		}, {
 			key: 'position',
 			value: function position() {
-				var point = (0, _util.getPoint)(this.picker);
-				this.picker.style.left = point.x + 'px';
-				this.picker.style.top = point.y /* + this.el.offsetHeight */ + 'px';
+				var point = (0, _util.getPoint)(this.el);
+				this.picker.style.left = point.x - 1 + 'px';
+				this.picker.style.top = point.y + this.el.offsetHeight + 2 + 'px';
 			}
 	
 			// 初始化事件	
@@ -351,6 +357,10 @@
 				var _this2 = this;
 	
 				var handler = function handler(event) {
+					var date = getDateObj(_this2.el.value);
+					if (date.valueOf()) {
+						_this2.selectDate = date;
+					}
 					_this2.tempDate = new Date();
 					_this2.tempDate.setTime(_this2.selectDate.getTime());
 					// console.log(this.tempDate)
@@ -383,6 +393,17 @@
 					// console.log(this.getAttribute('data-date-num'));
 	
 					that.setSelect('day', this.getAttribute('data-date-num'));
+				});
+	
+				(0, _util.addEvent)(this.prev, 'click', function () {
+					that.tempDate.setMonth(that.tempDate.getMonth() - 1);
+					that.setScreen();
+					that.renderDate();
+				});
+				(0, _util.addEvent)(this.next, 'click', function () {
+					that.tempDate.setMonth(that.tempDate.getMonth() + 1);
+					that.setScreen();
+					that.renderDate();
 				});
 				// addEvent(this.body, 'click', )
 			}

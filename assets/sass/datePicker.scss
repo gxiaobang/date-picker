@@ -23,11 +23,24 @@
 		line-height: 30px;
 		text-align: center;
 		background-color: $bg-heading;
+		@extend .clearfix;
+
+		.datepicker-screen {
+			cursor: pointer;
+		}
 		a {
-			display: none;
+			// display: none;
+			padding: 0 10px;
 			text-decoration: none;
 			// color: darken($gray);
 			// cursor: pointer;
+
+			&.prev {
+				float: left;
+			}
+			&.next {
+				float: right;
+			}
 		}
 	}
 	

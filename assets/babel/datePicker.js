@@ -11,9 +11,9 @@ const defaults = {
 		picker: `
 			<div class="datepicker">
 				<div class="datepicker-heading">
-					<a href="javascript:;" class="datepicker-prev">&lt;</a>
+					<a href="javascript:;" class="prev">&lt;</a>
 					<span class="datepicker-screen"></span>
-					<a href="javascript:;" class="datepicker-next">&gt;</a>
+					<a href="javascript:;" class="next">&gt;</a>
 				</div>
 				<div class="datepicker-body"></div>
 			</div>
@@ -106,8 +106,8 @@ function getMonthDays( year, month ) {
 }
 
 // 获取日期对象
-function getDateObj(time) {
-	var date = new Date;
+function getDateObj(str) {
+	// var date = new Date;
 	/*var arr = time.split(' '),
 			arr2;
 	for (let i = 0; i < arr.length; i++) {
@@ -143,7 +143,8 @@ function getDateObj(time) {
 			}
 		}
 	}*/
-	return date;
+
+	return new Date(str);
 }
 
 class DatePicker extends BaseMethod {
@@ -160,10 +161,15 @@ class DatePicker extends BaseMethod {
 	// 设置安装
 	setup() {
 		if (this.el) {
-			this.selectDate = getDateObj(this.defaultDate);
+			if (this.defaultDate) {
+				if (this.defaultDate == 'now') {
+					this.selectDate = new Date;
+				}
+				this.outputDate();
+			}
+			
 			// this.tempDate = this.selectDate;
 			this.type = 'day';
-			this.outputDate();
 			this.events();
 		}
 	}
@@ -175,14 +181,14 @@ class DatePicker extends BaseMethod {
 
 	// 屏幕显示
 	setScreen() {
-		this.screen.innerHTML = dateFormat('yyyy年MM月', this.selectDate);
+		this.screen.innerHTML = dateFormat('yyyy年MM月', this.tempDate);
 	}
 
 	// 创建picker
 	create() {
 		this.picker = parseDOM(defaults.templ.picker).children[0];
-		this.prev = getDOM('.datepicker-prev', this.picker)[0];
-		this.next = getDOM('.datepicker-next', this.picker)[0];
+		this.prev = getDOM('.prev', this.picker)[0];
+		this.next = getDOM('.next', this.picker)[0];
 		this.screen = getDOM('.datepicker-screen', this.picker)[0];
 		this.body = getDOM('.datepicker-body', this.picker)[0];
 		document.body.appendChild(this.picker);
@@ -287,14 +293,18 @@ class DatePicker extends BaseMethod {
 
 	// 定位
 	position() {
-		var point = getPoint(this.picker);
-		this.picker.style.left = point.x + 'px';
-		this.picker.style.top = point.y/* + this.el.offsetHeight */+ 'px';
+		var point = getPoint(this.el);
+		this.picker.style.left = point.x - 1 + 'px';
+		this.picker.style.top = point.y + this.el.offsetHeight + 2 + 'px';
 	}
 
 	// 初始化事件	
 	events() {
 		var handler = (event) => {
+			let date = getDateObj(this.el.value);
+			if (date.valueOf()) {
+				this.selectDate = date;
+			}
 			this.tempDate = new Date;
 			this.tempDate.setTime( this.selectDate.getTime() );
 			// console.log(this.tempDate)
@@ -326,6 +336,17 @@ class DatePicker extends BaseMethod {
 			// console.log(this.getAttribute('data-date-num'));
 
 			that.setSelect('day', this.getAttribute('data-date-num'));
+		});
+
+		addEvent(this.prev, 'click', function() {
+			that.tempDate.setMonth( that.tempDate.getMonth() - 1 );
+			that.setScreen();
+			that.renderDate();
+		});
+		addEvent(this.next, 'click', function() {
+			that.tempDate.setMonth( that.tempDate.getMonth() + 1 );
+			that.setScreen();
+			that.renderDate();
 		});
 		// addEvent(this.body, 'click', )
 	}
