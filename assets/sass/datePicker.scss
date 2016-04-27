@@ -1,17 +1,21 @@
 @import "_variables";
 @import "_mixins";
 @import "_utilities";
+@import "_text";
 @import "_button";
 @import "_keyframes";
 
 // 日历
 .datepicker {
+	$white: #fff;
+	$gray: #ccc;
 	$bg-heading: #e9f0f9;
 	$bg-thead: #D5E1F2;
 	$color-other: #bebebe;
 	$bg-hover: #f2f2f2;
-	$color-hover: #676767;
-	$gray: #ccc;
+	$color-hover: darken($gray, 40%);
+	$bg-selected: #5492f3;
+	// $color-hover: #676767;
 
 	position: absolute;
 
@@ -26,20 +30,61 @@
 		@extend .clearfix;
 
 		.datepicker-screen {
-			cursor: pointer;
+			cursor: pointer;	
 		}
-		a {
+		span {
 			// display: none;
 			padding: 0 10px;
+			font-family: NSimsun;	// 等宽字体，统一浏览器显示
 			text-decoration: none;
-			// color: darken($gray);
-			// cursor: pointer;
+			color: darken($gray, 50%);
+			cursor: pointer;
 
 			&.prev {
 				float: left;
 			}
 			&.next {
 				float: right;
+				// margin-top: -30px;
+			}
+		}
+	}
+
+	.datepicker-body {
+		min-width: 224px;
+		// min-height: 200px;
+
+		table {
+			width: 100%;
+			min-height: 200px;
+
+			td {
+				// padding: 6px 8px;
+	  		text-align: center;
+	  		// transition: all .1s;
+			}
+
+			tbody {
+				td {
+					cursor: pointer;
+					&:hover {
+		  			background-color: $bg-hover;
+		  		}
+
+		  		// 其它颜色
+					&.other {
+						color: $color-other;
+
+						&:hover {
+							color: $color-hover;
+						}
+					}
+					// 选中颜色
+					&.selected {
+						background-color: $bg-selected !important;
+						color: $white !important;
+					}
+				}
 			}
 		}
 	}
@@ -48,39 +93,21 @@
 	.datepicker-day {
 		border-collapse: collapse;
 		
-		td {
-			padding: 6px 8px;
-  		text-align: center;
-  		// transition: all .1s;
-		}
-
 		thead {
 			background-color: $bg-thead;
 			td {
 				// cursor: normal;
 			}
 		}
-
-		tbody {
-			td {
-				cursor: pointer;
-				&:hover {
-	  			background-color: $bg-hover;
-	  		}
-			}
-		}
-
-		td.datepicker-day-other {
-			color: $color-other;
-
-			&:hover {
-				color: $color-hover;
-			}
-		}
 	}
 	
 	// 月
 	.datepicker-month {
-	
+		font-family: 14px;
+		td {
+			// padding: 4px;
+			// text-align: center;
+			// cursor: pointer;
+		}
 	}
 }

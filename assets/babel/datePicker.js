@@ -11,9 +11,9 @@ const defaults = {
 		picker: `
 			<div class="datepicker">
 				<div class="datepicker-heading">
-					<a href="javascript:;" class="prev">&lt;</a>
-					<span class="datepicker-screen"></span>
-					<a href="javascript:;" class="next">&gt;</a>
+					<span class="prev">&lt;</span>
+					<span class="next">&gt;</span>
+					<div class="datepicker-screen"></div>
 				</div>
 				<div class="datepicker-body"></div>
 			</div>
@@ -21,30 +21,6 @@ const defaults = {
 		year: `
 			<table class="datepicker-year">
 				<tbody>{0}</tbody>
-			</table>
-		`,
-		month: `
-			<table class="datepicker-month">
-				<tbody>
-					<tr>
-						<td>一月</td>
-						<td>二月</td>
-						<td>三月</td>
-						<td>四月</td>
-					</tr>
-					<tr>
-						<td>五月</td>
-						<td>六月</td>
-						<td>七月</td>
-						<td>八月</td>
-					</tr>
-					<tr>
-						<td>九月</td>
-						<td>十月</td>
-						<td>十一月</td>
-						<td>十二月</td>
-					</tr>
-				</tbody>
 			</table>
 		`,
 		day: `
@@ -169,7 +145,6 @@ class DatePicker extends BaseMethod {
 			}
 			
 			// this.tempDate = this.selectDate;
-			this.type = 'day';
 			this.events();
 		}
 	}
@@ -181,7 +156,18 @@ class DatePicker extends BaseMethod {
 
 	// 屏幕显示
 	setScreen() {
-		this.screen.innerHTML = dateFormat('yyyy年MM月', this.tempDate);
+		var fmt;
+		switch (this.type) {
+			case 'year':
+				break;
+			case 'month':
+				fmt = 'yyyy年';
+				break;
+			case 'day':
+				fmt = 'yyyy年MM月';
+				break;
+		}
+		this.screen.innerHTML = dateFormat(fmt, this.tempDate);
 	}
 
 	// 创建picker
@@ -198,6 +184,7 @@ class DatePicker extends BaseMethod {
 	render() {
 
 		if (!this.picker) {
+			this.type = 'day';
 			this.create();
 			this.renderDate();
 			this.setScreen();
@@ -220,6 +207,7 @@ class DatePicker extends BaseMethod {
 			case 'year':
 				break;
 			case 'month':
+				html = this.monthDom();
 				break;
 			case 'day':
 				html = this.dayDom( this.tempDate.getFullYear(), this.tempDate.getMonth() );
@@ -231,7 +219,36 @@ class DatePicker extends BaseMethod {
 
 	// 月数据
 	monthDom() {
-		return defaults.templ.month;
+		var months = ['一月', '二月', '三月', '四月', 
+									'五月', '六月', '七月', '八月',
+									'九月', '十月', '十一月', '十二月'];
+		var html = '<table class="datepicker-month">';
+		html += '<tbody>';
+
+		var selectNum = -1;
+
+		if (this.selectDate.getFullYear() == this.tempDate.getFullYear()) {
+			selectNum = this.tempDate.getMonth();
+		}
+
+		for (let i = 0; i < months.length; i++) {
+			let m = i % 4;
+
+			if (m == 0) html += '<tr>';
+			if (selectNum == i) {
+				html += `<td class="selected" data-date-num="${i}">${months[i]}</td>`;
+			}
+			else {
+				html += `<td data-date-num="${i}">${months[i]}</td>`;
+			}
+			if (m == 3) html += '</tr>';
+		}
+
+		html += '</tbody>';
+		html += '</table>';
+
+
+		return html;
 	}
 
 	// 日数据
@@ -254,6 +271,13 @@ class DatePicker extends BaseMethod {
 
 		if (start == 0) start = 7;
 
+		// 选中天数
+		var selectNum = -1;
+
+		if (this.selectDate.getFullYear() == year && this.selectDate.getMonth() == month) {
+			selectNum = this.selectDate.getDate();
+		}
+
 		for (var i = 1; i <= r; i++) {
 			html += '<tr>';
 			for (var j = 1; j <= c; j++) {
@@ -262,15 +286,20 @@ class DatePicker extends BaseMethod {
 				now = r * (i - 1) + j + i - 1 - start;
 
 				if (now < 1) {
-					html += `<td class="datepicker-day-other" data-date-num="${now}">`;
+					html += `<td class="other" data-date-num="${now}">`;
 					now += prevDays;
 				}
 				else if (now > curDays) {
-					html += `<td class="datepicker-day-other" data-date-num="${now}">`;
+					html += `<td class="other" data-date-num="${now}">`;
 					now -= curDays;
 				}
 				else {
-					html += `<td data-date-num="${now}">`;
+					if (selectNum == now) {
+						html += `<td class="selected" data-date-num="${now}">`;
+					}
+					else {
+						html += `<td data-date-num="${now}">`;
+					}
 				}
 
 				html += now;
@@ -313,7 +342,7 @@ class DatePicker extends BaseMethod {
 		};
 
 		var hideHandler = (event) => {
-			if (!isTarget(event, this.el) && !isTarget(event, this.picker)) {
+			if (document.contains(event.target) && !isTarget(event, this.el) && !isTarget(event, this.picker)) {
 				this.hide();
 				// this.destroy();
 			}
@@ -334,19 +363,25 @@ class DatePicker extends BaseMethod {
 		var that = this;
 		addEvent(this.body, 'click', '.datepicker-day tbody td', function() {
 			// console.log(this.getAttribute('data-date-num'));
+			var num = this.getAttribute('data-date-num');
+			that.setSelect('day', num);
+		});
 
-			that.setSelect('day', this.getAttribute('data-date-num'));
+		addEvent(this.body, 'click', '.datepicker-month tbody td', function() {
+			// console.log(this.getAttribute('data-date-num'));
+			var num = this.getAttribute('data-date-num');
+			that.setSelect('month', num);
 		});
 
 		addEvent(this.prev, 'click', function() {
-			that.tempDate.setMonth( that.tempDate.getMonth() - 1 );
-			that.setScreen();
-			that.renderDate();
+			that.changeDate(-1);
 		});
 		addEvent(this.next, 'click', function() {
-			that.tempDate.setMonth( that.tempDate.getMonth() + 1 );
-			that.setScreen();
-			that.renderDate();
+			that.changeDate(1);
+		});
+		addEvent(this.screen, 'click', function() {
+			that.type = 'month';
+			that.changeDate(0);
 		});
 		// addEvent(this.body, 'click', )
 	}
@@ -354,15 +389,21 @@ class DatePicker extends BaseMethod {
 	// 设置选择
 	setSelect(type, num) {
 		switch (type) {
+			case 'month':
+				this.type = 'day';
+				this.tempDate.setMonth(num);
+				// this.renderDate();
+				this.changeDate(0)
+				break;
 			case 'day':
 				this.selectDate = new Date;
 				this.selectDate.setTime( this.tempDate.getTime() );
 				this.selectDate.setDate(num);
 				this.outputDate();
+				this.hide();
 				break;
 		}
 
-		this.hide();
 	}
 
 	// 销毁
@@ -382,6 +423,23 @@ class DatePicker extends BaseMethod {
 			this.picker.parentNode.removeChild(this.picker);
 			this.picker = null;
 		}
+	}
+
+	// 改变日期
+	changeDate(num) {
+		switch (this.type) {
+			case 'year':
+				break;
+			case 'month':
+				this.tempDate.setFullYear( this.tempDate.getFullYear() + num );
+				break;
+			case 'day':
+				this.tempDate.setMonth( this.tempDate.getMonth() + num );
+				break;
+		}
+
+		this.setScreen();
+		this.renderDate();
 	}
 }
 

@@ -74,9 +74,8 @@
 	
 	var defaults = {
 		templ: {
-			picker: '\n\t\t\t<div class="datepicker">\n\t\t\t\t<div class="datepicker-heading">\n\t\t\t\t\t<a href="javascript:;" class="prev">&lt;</a>\n\t\t\t\t\t<span class="datepicker-screen"></span>\n\t\t\t\t\t<a href="javascript:;" class="next">&gt;</a>\n\t\t\t\t</div>\n\t\t\t\t<div class="datepicker-body"></div>\n\t\t\t</div>\n\t\t',
+			picker: '\n\t\t\t<div class="datepicker">\n\t\t\t\t<div class="datepicker-heading">\n\t\t\t\t\t<span class="prev">&lt;</span>\n\t\t\t\t\t<span class="next">&gt;</span>\n\t\t\t\t\t<div class="datepicker-screen"></div>\n\t\t\t\t</div>\n\t\t\t\t<div class="datepicker-body"></div>\n\t\t\t</div>\n\t\t',
 			year: '\n\t\t\t<table class="datepicker-year">\n\t\t\t\t<tbody>{0}</tbody>\n\t\t\t</table>\n\t\t',
-			month: '\n\t\t\t<table class="datepicker-month">\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>一月</td>\n\t\t\t\t\t\t<td>二月</td>\n\t\t\t\t\t\t<td>三月</td>\n\t\t\t\t\t\t<td>四月</td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>五月</td>\n\t\t\t\t\t\t<td>六月</td>\n\t\t\t\t\t\t<td>七月</td>\n\t\t\t\t\t\t<td>八月</td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>九月</td>\n\t\t\t\t\t\t<td>十月</td>\n\t\t\t\t\t\t<td>十一月</td>\n\t\t\t\t\t\t<td>十二月</td>\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n\t\t',
 			day: '\n\t\t\t<table class="datepicker-day">\n\t\t\t\t<thead>\n\t\t\t\t\t<tr>{0}</tr>\n\t\t\t\t</thead>\n\t\t\t\t<tbody>\n\t\t\t\t\t{1}\n\t\t\t\t</tbody>\n\t\t\t</table>\n\t\t'
 		},
 		lang: 'zh-cn',
@@ -202,7 +201,6 @@
 					}
 	
 					// this.tempDate = this.selectDate;
-					this.type = 'day';
 					this.events();
 				}
 			}
@@ -220,7 +218,18 @@
 		}, {
 			key: 'setScreen',
 			value: function setScreen() {
-				this.screen.innerHTML = (0, _util.dateFormat)('yyyy年MM月', this.tempDate);
+				var fmt;
+				switch (this.type) {
+					case 'year':
+						break;
+					case 'month':
+						fmt = 'yyyy年';
+						break;
+					case 'day':
+						fmt = 'yyyy年MM月';
+						break;
+				}
+				this.screen.innerHTML = (0, _util.dateFormat)(fmt, this.tempDate);
 			}
 	
 			// 创建picker
@@ -243,6 +252,7 @@
 			value: function render() {
 	
 				if (!this.picker) {
+					this.type = 'day';
 					this.create();
 					this.renderDate();
 					this.setScreen();
@@ -264,6 +274,7 @@
 					case 'year':
 						break;
 					case 'month':
+						html = this.monthDom();
 						break;
 					case 'day':
 						html = this.dayDom(this.tempDate.getFullYear(), this.tempDate.getMonth());
@@ -278,7 +289,32 @@
 		}, {
 			key: 'monthDom',
 			value: function monthDom() {
-				return defaults.templ.month;
+				var months = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+				var html = '<table class="datepicker-month">';
+				html += '<tbody>';
+	
+				var selectNum = -1;
+	
+				if (this.selectDate.getFullYear() == this.tempDate.getFullYear()) {
+					selectNum = this.tempDate.getMonth();
+				}
+	
+				for (var i = 0; i < months.length; i++) {
+					var m = i % 4;
+	
+					if (m == 0) html += '<tr>';
+					if (selectNum == i) {
+						html += '<td class="selected" data-date-num="' + i + '">' + months[i] + '</td>';
+					} else {
+						html += '<td data-date-num="' + i + '">' + months[i] + '</td>';
+					}
+					if (m == 3) html += '</tr>';
+				}
+	
+				html += '</tbody>';
+				html += '</table>';
+	
+				return html;
 			}
 	
 			// 日数据
@@ -303,6 +339,13 @@
 	
 				if (start == 0) start = 7;
 	
+				// 选中天数
+				var selectNum = -1;
+	
+				if (this.selectDate.getFullYear() == year && this.selectDate.getMonth() == month) {
+					selectNum = this.selectDate.getDate();
+				}
+	
 				for (var i = 1; i <= r; i++) {
 					html += '<tr>';
 					for (var j = 1; j <= c; j++) {
@@ -310,13 +353,17 @@
 						now = r * (i - 1) + j + i - 1 - start;
 	
 						if (now < 1) {
-							html += '<td class="datepicker-day-other" data-date-num="' + now + '">';
+							html += '<td class="other" data-date-num="' + now + '">';
 							now += prevDays;
 						} else if (now > curDays) {
-							html += '<td class="datepicker-day-other" data-date-num="' + now + '">';
+							html += '<td class="other" data-date-num="' + now + '">';
 							now -= curDays;
 						} else {
-							html += '<td data-date-num="' + now + '">';
+							if (selectNum == now) {
+								html += '<td class="selected" data-date-num="' + now + '">';
+							} else {
+								html += '<td data-date-num="' + now + '">';
+							}
 						}
 	
 						html += now;
@@ -369,7 +416,7 @@
 				};
 	
 				var hideHandler = function hideHandler(event) {
-					if (!(0, _util.isTarget)(event, _this2.el) && !(0, _util.isTarget)(event, _this2.picker)) {
+					if (document.contains(event.target) && !(0, _util.isTarget)(event, _this2.el) && !(0, _util.isTarget)(event, _this2.picker)) {
 						_this2.hide();
 						// this.destroy();
 					}
@@ -391,19 +438,25 @@
 				var that = this;
 				(0, _util.addEvent)(this.body, 'click', '.datepicker-day tbody td', function () {
 					// console.log(this.getAttribute('data-date-num'));
+					var num = this.getAttribute('data-date-num');
+					that.setSelect('day', num);
+				});
 	
-					that.setSelect('day', this.getAttribute('data-date-num'));
+				(0, _util.addEvent)(this.body, 'click', '.datepicker-month tbody td', function () {
+					// console.log(this.getAttribute('data-date-num'));
+					var num = this.getAttribute('data-date-num');
+					that.setSelect('month', num);
 				});
 	
 				(0, _util.addEvent)(this.prev, 'click', function () {
-					that.tempDate.setMonth(that.tempDate.getMonth() - 1);
-					that.setScreen();
-					that.renderDate();
+					that.changeDate(-1);
 				});
 				(0, _util.addEvent)(this.next, 'click', function () {
-					that.tempDate.setMonth(that.tempDate.getMonth() + 1);
-					that.setScreen();
-					that.renderDate();
+					that.changeDate(1);
+				});
+				(0, _util.addEvent)(this.screen, 'click', function () {
+					that.type = 'month';
+					that.changeDate(0);
 				});
 				// addEvent(this.body, 'click', )
 			}
@@ -414,15 +467,20 @@
 			key: 'setSelect',
 			value: function setSelect(type, num) {
 				switch (type) {
+					case 'month':
+						this.type = 'day';
+						this.tempDate.setMonth(num);
+						// this.renderDate();
+						this.changeDate(0);
+						break;
 					case 'day':
 						this.selectDate = new Date();
 						this.selectDate.setTime(this.tempDate.getTime());
 						this.selectDate.setDate(num);
 						this.outputDate();
+						this.hide();
 						break;
 				}
-	
-				this.hide();
 			}
 	
 			// 销毁
@@ -447,6 +505,26 @@
 					this.picker.parentNode.removeChild(this.picker);
 					this.picker = null;
 				}
+			}
+	
+			// 改变日期
+	
+		}, {
+			key: 'changeDate',
+			value: function changeDate(num) {
+				switch (this.type) {
+					case 'year':
+						break;
+					case 'month':
+						this.tempDate.setFullYear(this.tempDate.getFullYear() + num);
+						break;
+					case 'day':
+						this.tempDate.setMonth(this.tempDate.getMonth() + num);
+						break;
+				}
+	
+				this.setScreen();
+				this.renderDate();
 			}
 		}]);
 	
@@ -725,6 +803,7 @@
 	// 是否为事件目标，或在目标内部
 	function isTarget(event, el) {
 		var target = event.target;
+	
 		while (target !== document.documentElement) {
 			if (target === el) {
 				return true;

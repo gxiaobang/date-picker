@@ -216,6 +216,7 @@ function fixEvent(event) {
 // 是否为事件目标，或在目标内部
 function isTarget(event, el) {
 	var target = event.target;
+
 	while (target !== document.documentElement) {
 		if (target === el) {
 			return true;
