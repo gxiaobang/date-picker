@@ -76,6 +76,7 @@
 		templ: {
 			picker: '\n\t\t\t<div class="datepicker">\n\t\t\t\t<div class="datepicker-heading">\n\t\t\t\t\t<span class="prev">&lt;</span>\n\t\t\t\t\t<span class="next">&gt;</span>\n\t\t\t\t\t<div class="datepicker-screen"></div>\n\t\t\t\t</div>\n\t\t\t\t<div class="datepicker-body"></div>\n\t\t\t</div>\n\t\t',
 			year: '\n\t\t\t<table class="datepicker-year">\n\t\t\t\t<tbody>{0}</tbody>\n\t\t\t</table>\n\t\t',
+			month: '\n\t\t\t<table class="datepicker-month">\n\t\t\t\t<tbody>{0}</tbody>\n\t\t\t</table>\n\t\t',
 			day: '\n\t\t\t<table class="datepicker-day">\n\t\t\t\t<thead>\n\t\t\t\t\t<tr>{0}</tr>\n\t\t\t\t</thead>\n\t\t\t\t<tbody>\n\t\t\t\t\t{1}\n\t\t\t\t</tbody>\n\t\t\t</table>\n\t\t'
 		},
 		lang: 'zh-cn',
@@ -284,39 +285,6 @@
 				this.body.innerHTML = html;
 			}
 	
-			// 月数据
-	
-		}, {
-			key: 'monthDom',
-			value: function monthDom() {
-				var months = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
-				var html = '<table class="datepicker-month">';
-				html += '<tbody>';
-	
-				var selectNum = -1;
-	
-				if (this.selectDate.getFullYear() == this.tempDate.getFullYear()) {
-					selectNum = this.tempDate.getMonth();
-				}
-	
-				for (var i = 0; i < months.length; i++) {
-					var m = i % 4;
-	
-					if (m == 0) html += '<tr>';
-					if (selectNum == i) {
-						html += '<td class="selected" data-date-num="' + i + '">' + months[i] + '</td>';
-					} else {
-						html += '<td data-date-num="' + i + '">' + months[i] + '</td>';
-					}
-					if (m == 3) html += '</tr>';
-				}
-	
-				html += '</tbody>';
-				html += '</table>';
-	
-				return html;
-			}
-	
 			// 日数据
 	
 		}, {
@@ -378,12 +346,43 @@
 				}).join(''), html);
 			}
 	
+			// 月数据
+	
+		}, {
+			key: 'monthDom',
+			value: function monthDom() {
+				var months = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '<small>十一月</small>', '<small>十二月</small>'];
+	
+				var html = '';
+				var selectNum = -1;
+	
+				if (this.selectDate.getFullYear() == this.tempDate.getFullYear()) {
+					selectNum = this.tempDate.getMonth();
+				}
+	
+				for (var i = 0; i < months.length; i++) {
+					var m = i % 4;
+	
+					if (m == 0) html += '<tr>';
+					if (selectNum == i) {
+						html += '<td class="selected" data-date-num="' + i + '">' + months[i] + '</td>';
+					} else {
+						html += '<td data-date-num="' + i + '">' + months[i] + '</td>';
+					}
+					if (m == 3) html += '</tr>';
+				}
+	
+				return (0, _util.templ)(defaults.templ.month, html);
+			}
+	
 			// 年数据
 	
 		}, {
 			key: 'yearDom',
 			value: function yearDom() {
-				return;
+				return (0, _util.templ)(defaults.templ.year, defaults.getWeek().map(function (day) {
+					return '<td>' + day + '</td>';
+				}).join(''), html);
 			}
 	
 			// 定位
