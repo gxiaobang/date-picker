@@ -3,7 +3,7 @@
  */
 
 import { getPoint, BaseMethod, forEach, isTarget,
-					getDOM, parseDOM, dateFormat,
+					$s, parseDOM, dateFormat,
 					addEvent, removeEvent, templ } from './util.js';
 
 const defaults = {
@@ -132,7 +132,7 @@ class DatePicker extends BaseMethod {
 	// defaultDate = 'now'当前日期
 	constructor(el, { fmt = 'yyyy-MM-dd', defaultDate = '' }) {
 		super();
-		this.el = getDOM(el)[0];
+		this.el = $s(el)[0];
 		this.fmt = fmt;
 		this.defaultDate = defaultDate;
 		this.initFn('picked');
@@ -161,27 +161,29 @@ class DatePicker extends BaseMethod {
 
 	// 屏幕显示
 	setScreen() {
-		var fmt;
+		var ret;
 		switch (this.type) {
 			case 'year':
+				let per = Math.floor(this.tempDate.getFullYear() / 10);
+				ret = (per * 10 - 1) + '-' + (per * 10 + 10);
 				break;
 			case 'month':
-				fmt = 'yyyy年';
+				ret = dateFormat('yyyy年', this.tempDate);
 				break;
 			case 'day':
-				fmt = 'yyyy年MM月';
+				ret = dateFormat('yyyy年MM月', this.tempDate);
 				break;
 		}
-		this.screen.innerHTML = dateFormat(fmt, this.tempDate);
+		this.screen.innerHTML = ret;
 	}
 
 	// 创建picker
 	create() {
 		this.picker = parseDOM(defaults.templ.picker).children[0];
-		this.prev = getDOM('.prev', this.picker)[0];
-		this.next = getDOM('.next', this.picker)[0];
-		this.screen = getDOM('.datepicker-screen', this.picker)[0];
-		this.body = getDOM('.datepicker-body', this.picker)[0];
+		this.prev = $s('.prev', this.picker)[0];
+		this.next = $s('.next', this.picker)[0];
+		this.screen = $s('.datepicker-screen', this.picker)[0];
+		this.body = $s('.datepicker-body', this.picker)[0];
 		document.body.appendChild(this.picker);
 	}
 
@@ -210,6 +212,7 @@ class DatePicker extends BaseMethod {
 		var html;
 		switch (this.type) {
 			case 'year':
+				html = this.yearDom();
 				break;
 			case 'month':
 				html = this.monthDom();
@@ -281,7 +284,7 @@ class DatePicker extends BaseMethod {
 		}
 
 		return templ(defaults.templ.day,
-				defaults.getWeek().map((day) => `<td>${day}</td>`).join(''),
+				defaults.getWeek().map((day) => `<th>${day}</th>`).join(''),
 				html
 			);
 	}
@@ -319,10 +322,28 @@ class DatePicker extends BaseMethod {
 
 	// 年数据
 	yearDom() {
-		return templ(defaults.templ.year,
-				defaults.getWeek().map((day) => `<td>${day}</td>`).join(''),
-				html
-			);
+
+		var year = this.tempDate.getFullYear(),
+				per = Math.floor(year / 10);
+
+		var html = '';
+
+		for (let i = 0; i < 12; i++) {
+			let m = i % 4;
+			let now = per*10 + i - 1;
+			if (m == 0) html += '<tr>';
+			html += `<td data-date-num="${now}">${now}</td>`;
+			/*if (now == year) {
+				html += `<td class="selected" data-date-num="${i}">${now}</td>`;
+			}
+			else {
+				html += `<td data-date-num="${i}">${now}</td>`;
+			}*/
+			if (m == 3) html += '</tr>';
+		}
+
+
+		return templ(defaults.templ.year, html);
 	}
 
 	// 定位
@@ -366,16 +387,20 @@ class DatePicker extends BaseMethod {
 	initPickerEvent() {
 
 		var that = this;
-		addEvent(this.body, 'click', '.datepicker-day tbody td', function() {
+		addEvent(this.body, 'click', '.datepicker-day td', function() {
 			// console.log(this.getAttribute('data-date-num'));
 			var num = this.getAttribute('data-date-num');
 			that.setSelect('day', num);
 		});
 
-		addEvent(this.body, 'click', '.datepicker-month tbody td', function() {
-			// console.log(this.getAttribute('data-date-num'));
+		addEvent(this.body, 'click', '.datepicker-month td', function() {
 			var num = this.getAttribute('data-date-num');
 			that.setSelect('month', num);
+		});
+
+		addEvent(this.body, 'click', '.datepicker-year td', function() {
+			var num = this.getAttribute('data-date-num');
+			that.setSelect('year', num);
 		});
 
 		addEvent(this.prev, 'click', function() {
@@ -385,7 +410,19 @@ class DatePicker extends BaseMethod {
 			that.changeDate(1);
 		});
 		addEvent(this.screen, 'click', function() {
-			that.type = 'month';
+			// that.type = 'month';
+
+			switch (that.type) {
+				/*case 'year':
+					that.type = 'month';
+					break;*/
+				case 'month':
+					that.type = 'year';
+					break;
+				case 'day':
+					that.type = 'month';
+					break;
+			}
 			that.changeDate(0);
 		});
 		// addEvent(this.body, 'click', )
@@ -394,11 +431,16 @@ class DatePicker extends BaseMethod {
 	// 设置选择
 	setSelect(type, num) {
 		switch (type) {
+			case 'year':
+				this.type = 'month';
+				this.tempDate.setFullYear(num);
+				this.changeDate(0);
+				break;
 			case 'month':
 				this.type = 'day';
 				this.tempDate.setMonth(num);
 				// this.renderDate();
-				this.changeDate(0)
+				this.changeDate(0);
 				break;
 			case 'day':
 				this.selectDate = new Date;
@@ -408,7 +450,6 @@ class DatePicker extends BaseMethod {
 				this.hide();
 				break;
 		}
-
 	}
 
 	// 销毁
@@ -434,6 +475,7 @@ class DatePicker extends BaseMethod {
 	changeDate(num) {
 		switch (this.type) {
 			case 'year':
+				this.tempDate.setFullYear( this.tempDate.getFullYear() + num * 10 );
 				break;
 			case 'month':
 				this.tempDate.setFullYear( this.tempDate.getFullYear() + num );

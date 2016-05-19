@@ -92,7 +92,7 @@ function named(name) {
 }
 
 // 获取dom节点
-function getDOM(expr, root = document) {
+function $s(expr, root = document) {
 	if (isString(expr)) {
 		return root.querySelectorAll(expr);
 	}
@@ -161,7 +161,7 @@ function getStyle(el, name) {
 function setStyle(el, name, value) {
 
 	if (isString(el)) {
-		el = getDOM(el)[0];
+		el = $s(el)[0];
 	}
 	else if (isArray(el)) {
 		forEach(el, elem => setStyle(elem, name, value));
@@ -231,7 +231,7 @@ function addEvent(el, type, expr, fn) {
 	// el.addEventListener(type, fn, false);
 
 	if (isString(el)) {
-		el = getDOM(el);
+		el = $s(el);
 	}
 	
 	if (el.length) {
@@ -275,7 +275,7 @@ function delegate(el, type, expr, fn) {
 		let target = event.target;
 
 		if (suports.is('matches')) {
-			while (target !== el) {
+			while (target && target !== el) {
 				if (target.matches(expr)) {
 					fn && fn.call(target, event);
 					break;
@@ -284,7 +284,7 @@ function delegate(el, type, expr, fn) {
 			}
 		}
 		else {
-			let els = getDOM(expr);
+			let els = $s(expr);
 			els = Array.from(els);
 			while (target !== el) {
 				if (els.indexOf(el) > -1) {
@@ -476,7 +476,7 @@ var suports = {
 export { 
 	isObject, isNumber, isArray, isString, isFunction,
 	forEach,
-	getIndex, getDOM, 
+	getIndex, $s, 
 	parseDOM, getStyle, setStyle, 
 	isTarget, addEvent, removeEvent,
 	BaseMethod, 
