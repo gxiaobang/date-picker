@@ -213,17 +213,14 @@ function fixEvent(event) {
 	return event;
 }
 
-// 是否为事件目标，或在目标内部
-function isTarget(event, el) {
-	var target = event.target;
-
-	while (target !== document.documentElement) {
-		if (target === el) {
-			return true;
-		}
-		target = target.parentNode;
+// 判断包含关系
+function contains(e1, e2) {
+	if (e1.contains) {
+		return e1.contains(e2);
 	}
-	return false;
+	else {
+		return e1.compareDocumentPosition(e2) == 16;
+	}
 }
 
 // 事件绑定
@@ -478,7 +475,7 @@ export {
 	forEach,
 	getIndex, $s, 
 	parseDOM, getStyle, setStyle, 
-	isTarget, addEvent, removeEvent,
+	contains, addEvent, removeEvent,
 	BaseMethod, 
 	templ, dateFormat, getPoint,
 	mixin, Http, requestAnim, suports

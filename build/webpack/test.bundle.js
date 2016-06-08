@@ -436,9 +436,9 @@
 				};
 	
 				var hideHandler = function hideHandler(event) {
-					if (document.contains(event.target) && !(0, _util.isTarget)(event, _this2.el) && !(0, _util.isTarget)(event, _this2.picker)) {
-						_this2.hide();
-						// this.destroy();
+					var target = event.target;
+					if (DatePicker.within(_this2.picker, event.target) && !DatePicker.within(_this2.el, event.target)) {
+						_this2.destroy();
 					}
 				};
 	
@@ -447,7 +447,7 @@
 				};
 				this._off = function () {
 					_this2._offHide();
-					(0, _util.removeEvent)(_this2.el, 'focus', handler);
+					// removeEvent(this.el, 'focus', handler);
 				};
 				(0, _util.addEvent)(this.el, 'focus', handler);
 			}
@@ -567,6 +567,11 @@
 	
 				this.setScreen();
 				this.renderDate();
+			}
+		}], [{
+			key: 'within',
+			value: function within(e1, e2) {
+				return e1 === e2 || (0, _util.contains)(e1, e2) || (0, _util.contains)(document, e2);
 			}
 		}]);
 	
@@ -842,17 +847,13 @@
 		return event;
 	}
 	
-	// 是否为事件目标，或在目标内部
-	function isTarget(event, el) {
-		var target = event.target;
-	
-		while (target !== document.documentElement) {
-			if (target === el) {
-				return true;
-			}
-			target = target.parentNode;
+	// 判断包含关系
+	function contains(e1, e2) {
+		if (e1.contains) {
+			return e1.contains(e2);
+		} else {
+			return e1.compareDocumentPosition(e2) == 16;
 		}
-		return false;
 	}
 	
 	// 事件绑定
@@ -1155,7 +1156,7 @@
 	exports.parseDOM = parseDOM;
 	exports.getStyle = getStyle;
 	exports.setStyle = setStyle;
-	exports.isTarget = isTarget;
+	exports.contains = contains;
 	exports.addEvent = addEvent;
 	exports.removeEvent = removeEvent;
 	exports.BaseMethod = BaseMethod;

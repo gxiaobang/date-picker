@@ -2,7 +2,8 @@
  * 日历
  */
 
-import { getPoint, BaseMethod, forEach, isTarget,
+import { getPoint, BaseMethod, forEach,
+					contains,
 					$s, parseDOM, dateFormat,
 					addEvent, removeEvent, templ } from './util.js';
 
@@ -368,9 +369,9 @@ class DatePicker extends BaseMethod {
 		};
 
 		var hideHandler = (event) => {
-			if (document.contains(event.target) && !isTarget(event, this.el) && !isTarget(event, this.picker)) {
-				this.hide();
-				// this.destroy();
+			var target = event.target;
+			if (DatePicker.within(this.picker, event.target) && !DatePicker.within(this.el, event.target)) {
+				this.destroy();
 			}
 		};
 
@@ -379,7 +380,7 @@ class DatePicker extends BaseMethod {
 		};
 		this._off = () => {
 			this._offHide();
-			removeEvent(this.el, 'focus', handler);
+			// removeEvent(this.el, 'focus', handler);
 		};
 		addEvent(this.el, 'focus', handler);
 	}
@@ -487,6 +488,10 @@ class DatePicker extends BaseMethod {
 
 		this.setScreen();
 		this.renderDate();
+	}
+
+	static within(e1, e2) {
+		return e1 === e2 || contains(e1, e2) || contains(document, e2);
 	}
 }
 
