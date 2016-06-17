@@ -46,6 +46,8 @@
 
 	__webpack_require__(1);
 	__webpack_require__(3);
+	__webpack_require__(5);
+	__webpack_require__(4);
 	module.exports = __webpack_require__(2);
 
 
@@ -182,6 +184,7 @@
 			_this.el = (0, _util.$s)(el)[0];
 			_this.fmt = fmt;
 			_this.defaultDate = defaultDate;
+			_this.enabled = false;
 			_this.initFn('picked');
 			_this.setup();
 			return _this;
@@ -424,6 +427,9 @@
 				var _this2 = this;
 	
 				var handler = function handler(event) {
+	
+					if (_this2.enabled) return;
+					_this2.enabled = true;
 					var date = getDateObj(_this2.el.value);
 					if (date.valueOf()) {
 						_this2.selectDate = date;
@@ -437,19 +443,17 @@
 	
 				var hideHandler = function hideHandler(event) {
 					var target = event.target;
-					if (DatePicker.within(_this2.picker, event.target) && !DatePicker.within(_this2.el, event.target)) {
+					if ((0, _util.contains)(document, target) && !DatePicker.within(_this2.picker, event.target) && !DatePicker.within(_this2.el, event.target)) {
 						_this2.destroy();
 					}
 				};
 	
-				this._offHide = function () {
-					(0, _util.removeEvent)(document, 'click', hideHandler);
-				};
 				this._off = function () {
-					_this2._offHide();
+					(0, _util.removeEvent)(document, 'click', hideHandler);
 					// removeEvent(this.el, 'focus', handler);
 				};
 				(0, _util.addEvent)(this.el, 'focus', handler);
+				(0, _util.addEvent)(this.el, 'click', handler);
 			}
 		}, {
 			key: 'initPickerEvent',
@@ -515,6 +519,7 @@
 						this.changeDate(0);
 						break;
 					case 'day':
+						this.el.focus();
 						this.selectDate = new Date();
 						this.selectDate.setTime(this.tempDate.getTime());
 						this.selectDate.setDate(num);
@@ -524,19 +529,13 @@
 				}
 			}
 	
-			// 销毁
+			// 隐藏
 	
-		}, {
-			key: 'destroy',
-			value: function destroy() {
-				this._off && this._off();
-				this.remove();
-			}
 		}, {
 			key: 'hide',
 			value: function hide() {
-				this._offHide() && this._offHide();
-				// this.picker.style.display = 'none';
+				this.enabled = false;
+				this._off();
 				this.remove();
 			}
 		}, {
@@ -571,7 +570,7 @@
 		}], [{
 			key: 'within',
 			value: function within(e1, e2) {
-				return e1 === e2 || (0, _util.contains)(e1, e2) || (0, _util.contains)(document, e2);
+				return e1 === e2 || (0, _util.contains)(e1, e2);
 			}
 		}]);
 	
@@ -591,10 +590,6 @@
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -1010,6 +1005,83 @@
 		};
 	}
 	
+	// 检测浏览器支持
+	var suports = {
+		_cache: {},
+		is: function is(prop) {
+			return true;
+		},
+	
+		// 获取支持属性
+		get: function get(prop) {
+			if (this._cache[prop]) return this._cache[prop];
+			return prop;
+		}
+	};
+	
+	exports.noop = noop;
+	exports.BaseMethod = BaseMethod;
+	exports.isObject = isObject;
+	exports.isNumber = isNumber;
+	exports.isArray = isArray;
+	exports.isString = isString;
+	exports.isFunction = isFunction;
+	exports.forEach = forEach;
+	exports.getIndex = getIndex;
+	exports.$s = $s;
+	exports.parseDOM = parseDOM;
+	exports.getStyle = getStyle;
+	exports.setStyle = setStyle;
+	exports.contains = contains;
+	exports.addEvent = addEvent;
+	exports.removeEvent = removeEvent;
+	exports.templ = templ;
+	exports.dateFormat = dateFormat;
+	exports.getPoint = getPoint;
+	exports.mixin = mixin;
+	exports.requestAnim = requestAnim;
+	exports.suports = suports;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	__webpack_require__(4);
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _datePicker = __webpack_require__(1);
+	
+	new _datePicker.DatePicker('#datePicker', { fmt: 'yyyy-MM-dd', defaultDate: 'now' }).on('picked', function () {}); /**
+	                                                                                                                    * 测试日历
+	                                                                                                                    */
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _util = __webpack_require__(2);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
 	// http请求
 	
 	var Http = function (_BaseMethod) {
@@ -1025,14 +1097,14 @@
 	
 			_classCallCheck(this, Http);
 	
-			var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(Http).call(this));
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Http).call(this));
 	
-			_this2.initFn('beforeSend', 'success', 'error', 'complete');
-			_this2.method = method;
-			_this2.url = url;
-			_this2.param = param;
-			_this2.setup();
-			return _this2;
+			_this.initFn('beforeSend', 'success', 'error', 'complete');
+			_this.method = method;
+			_this.url = url;
+			_this.param = param;
+			_this.setup();
+			return _this;
 		}
 	
 		_createClass(Http, [{
@@ -1065,23 +1137,23 @@
 		}, {
 			key: 'events',
 			value: function events() {
-				var _this3 = this;
+				var _this2 = this;
 	
 				this.xhr.onreadystatechange = function () {
 					// console.log(this.xhr.readyState);
-					if (_this3.xhr.readyState == 4) {
-						switch (_this3.xhr.status) {
+					if (_this2.xhr.readyState == 4) {
+						switch (_this2.xhr.status) {
 							case 200:
 							// 有缓存
 							case 302:
-								_this3.success();
+								_this2.success();
 								break;
 							case 404:
 							case 500:
-								_this3.error();
+								_this2.error();
 								break;
 						}
-						_this3.complete();
+						_this2.complete();
 					}
 				};
 			}
@@ -1127,59 +1199,10 @@
 		}]);
 	
 		return Http;
-	}(BaseMethod);
+	}(_util.BaseMethod);
 	
-	// 检测浏览器支持
-	
-	
-	var suports = {
-		_cache: {},
-		is: function is(prop) {
-			return true;
-		},
-	
-		// 获取支持属性
-		get: function get(prop) {
-			if (this._cache[prop]) return this._cache[prop];
-			return prop;
-		}
-	};
-	
-	exports.isObject = isObject;
-	exports.isNumber = isNumber;
-	exports.isArray = isArray;
-	exports.isString = isString;
-	exports.isFunction = isFunction;
-	exports.forEach = forEach;
-	exports.getIndex = getIndex;
-	exports.$s = $s;
-	exports.parseDOM = parseDOM;
-	exports.getStyle = getStyle;
-	exports.setStyle = setStyle;
-	exports.contains = contains;
-	exports.addEvent = addEvent;
-	exports.removeEvent = removeEvent;
-	exports.BaseMethod = BaseMethod;
-	exports.templ = templ;
-	exports.dateFormat = dateFormat;
-	exports.getPoint = getPoint;
-	exports.mixin = mixin;
-	exports.Http = Http;
-	exports.requestAnim = requestAnim;
-	exports.suports = suports;
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _datePicker = __webpack_require__(1);
-	
-	new _datePicker.DatePicker('#datePicker', { fmt: 'yyyy-MM-dd', defaultDate: 'now' }).on('picked', function () {}); /**
-	                                                                                                                    * 测试日历
-	                                                                                                                    */
+	exports.default = Http;
 
 /***/ }
 /******/ ]);
-//# sourceMappingURL=test.bundle.js.map
+//# sourceMappingURL=entry.js.map

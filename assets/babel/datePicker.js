@@ -136,6 +136,7 @@ class DatePicker extends BaseMethod {
 		this.el = $s(el)[0];
 		this.fmt = fmt;
 		this.defaultDate = defaultDate;
+		this.enabled = false;
 		this.initFn('picked');
 		this.setup();
 	}
@@ -357,6 +358,9 @@ class DatePicker extends BaseMethod {
 	// 初始化事件	
 	events() {
 		var handler = (event) => {
+
+			if (this.enabled) return;
+			this.enabled = true;
 			let date = getDateObj(this.el.value);
 			if (date.valueOf()) {
 				this.selectDate = date;
@@ -370,19 +374,17 @@ class DatePicker extends BaseMethod {
 
 		var hideHandler = (event) => {
 			var target = event.target;
-			if (DatePicker.within(this.picker, event.target) && !DatePicker.within(this.el, event.target)) {
+			if (contains(document, target) && (!DatePicker.within(this.picker, event.target) && !DatePicker.within(this.el, event.target))) {
 				this.destroy();
 			}
 		};
 
-		this._offHide = () => {
-			removeEvent(document, 'click', hideHandler);
-		};
 		this._off = () => {
-			this._offHide();
+			removeEvent(document, 'click', hideHandler);
 			// removeEvent(this.el, 'focus', handler);
 		};
 		addEvent(this.el, 'focus', handler);
+		addEvent(this.el, 'click', handler);
 	}
 
 	initPickerEvent() {
@@ -444,6 +446,7 @@ class DatePicker extends BaseMethod {
 				this.changeDate(0);
 				break;
 			case 'day':
+				this.el.focus();
 				this.selectDate = new Date;
 				this.selectDate.setTime( this.tempDate.getTime() );
 				this.selectDate.setDate(num);
@@ -453,15 +456,10 @@ class DatePicker extends BaseMethod {
 		}
 	}
 
-	// 销毁
-	destroy() {
-		this._off && this._off();
-		this.remove();
-	}
-
+	// 隐藏
 	hide() {
-		this._offHide() && this._offHide();
-		// this.picker.style.display = 'none';
+		this.enabled = false;
+		this._off();
 		this.remove();
 	}
 
@@ -490,8 +488,9 @@ class DatePicker extends BaseMethod {
 		this.renderDate();
 	}
 
+
 	static within(e1, e2) {
-		return e1 === e2 || contains(e1, e2) || contains(document, e2);
+		return e1 === e2 || contains(e1, e2);
 	}
 }
 
