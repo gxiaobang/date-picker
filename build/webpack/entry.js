@@ -175,7 +175,7 @@
 			var _ref$fmt = _ref.fmt;
 			var fmt = _ref$fmt === undefined ? 'yyyy-MM-dd' : _ref$fmt;
 			var _ref$defaultDate = _ref.defaultDate;
-			var defaultDate = _ref$defaultDate === undefined ? '' : _ref$defaultDate;
+			var defaultDate = _ref$defaultDate === undefined ? new Date() : _ref$defaultDate;
 	
 			_classCallCheck(this, DatePicker);
 	
@@ -198,9 +198,7 @@
 			value: function setup() {
 				if (this.el) {
 					if (this.defaultDate) {
-						if (this.defaultDate == 'now') {
-							this.selectDate = new Date();
-						}
+						this.selectDate = this.defaultDate;
 						this.outputDate();
 					}
 	
@@ -524,16 +522,17 @@
 						this.selectDate.setTime(this.tempDate.getTime());
 						this.selectDate.setDate(num);
 						this.outputDate();
-						this.hide();
+						this.destroy();
+						this.trigger(this.fn.picked, this, this.picker);
 						break;
 				}
 			}
 	
-			// 隐藏
+			// 销毁
 	
 		}, {
-			key: 'hide',
-			value: function hide() {
+			key: 'destroy',
+			value: function destroy() {
 				this.enabled = false;
 				this._off();
 				this.remove();
@@ -1058,9 +1057,11 @@
 	
 	var _datePicker = __webpack_require__(1);
 	
-	new _datePicker.DatePicker('#datePicker', { fmt: 'yyyy-MM-dd', defaultDate: 'now' }).on('picked', function () {}); /**
-	                                                                                                                    * 测试日历
-	                                                                                                                    */
+	new _datePicker.DatePicker('#datePicker', { fmt: 'yyyy-MM-dd' }).on('picked', function () {
+		console.log('picked事件触发');
+	}); /**
+	     * 测试日历
+	     */
 
 /***/ },
 /* 5 */

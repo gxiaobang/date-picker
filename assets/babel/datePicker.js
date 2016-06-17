@@ -131,7 +131,7 @@ function getDateObj(str) {
 
 class DatePicker extends BaseMethod {
 	// defaultDate = 'now'当前日期
-	constructor(el, { fmt = 'yyyy-MM-dd', defaultDate = '' }) {
+	constructor(el, { fmt = 'yyyy-MM-dd', defaultDate = new Date }) {
 		super();
 		this.el = $s(el)[0];
 		this.fmt = fmt;
@@ -145,9 +145,7 @@ class DatePicker extends BaseMethod {
 	setup() {
 		if (this.el) {
 			if (this.defaultDate) {
-				if (this.defaultDate == 'now') {
-					this.selectDate = new Date;
-				}
+				this.selectDate = this.defaultDate;
 				this.outputDate();
 			}
 			
@@ -451,13 +449,14 @@ class DatePicker extends BaseMethod {
 				this.selectDate.setTime( this.tempDate.getTime() );
 				this.selectDate.setDate(num);
 				this.outputDate();
-				this.hide();
+				this.destroy();
+				this.trigger(this.fn.picked, this, this.picker);
 				break;
 		}
 	}
 
-	// 隐藏
-	hide() {
+	// 销毁
+	destroy() {
 		this.enabled = false;
 		this._off();
 		this.remove();

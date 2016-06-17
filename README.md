@@ -1,5 +1,4 @@
-# datePicker
-日历组件
+# datePicker 日历组件
 
 ## 参数配置
 new DatePicker(el, options);
