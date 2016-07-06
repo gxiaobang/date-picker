@@ -13,6 +13,41 @@
   }
 }
 
+// keyframes动画帧
+@mixin frames-fade($a, $b) {
+  0% {
+    opacity: $a;
+  }
+  100% {
+    opacity: $b;
+  }
+}
+@mixin frames-scale($a, $b) {
+  0% {
+    transform: scale(#{$a});
+  }
+  100% {
+    transform: scale(#{$b});
+  }
+}
+@mixin frames-slide($a, $b) {
+  0% {
+    height: $a;
+  }
+  100% {
+    height: $b;
+  }
+}
+@mixin frames-rotate($a, $b) {
+  0% {
+    transform: rotate(#{$a});
+  }
+  100% {
+    transform: rotate(#{$b});
+  }
+}
+// === End keyframes动画帧 ===
+
 
 // 透明度
 @mixin opacity($value: 1) {
