@@ -1,23 +1,23 @@
 # datePicker 日历组件
 
-## 参数配置
-new DatePicker(el, options);
-+ el 元素
-+ options.fmt 日期格式
-+ options.defaultDate 默认日期，now为当前日期
+## 日期选择，年月日
 
-在html引入文件`datePicker.js`和`datePicker.css`
-### html部分
-```html
-<input type="text" id="datePicker">
-```
+## 语法
+`new DatePicker(el, options)`
+## 参数
+options  		 |type					|default		|descript
+-------------|--------------|-----------|-----------
+fmt			 		 |String				|yyyy-MM-dd	|输出日期格式
+defaultDate	 |Date					|new Date() |默认日期
+picked			 |Function			|null				|日期选取事件 
 
-### js部分：传入input的id并设置日期格式
+
+## 示例
 ```javascript
 new DatePicker('#datePicker', { fmt: 'yyyy-MM-dd' })
 ```
 
-### 事件监听，在选择日期生效后，触发`picked`事件
+## 事件监听
 ```javascript
 new DatePicker('#datePicker', { fmt: 'yyyy-MM-dd' })
 	.on('picked', () => {
