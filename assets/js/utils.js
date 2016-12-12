@@ -1,7 +1,7 @@
 /**
  * util.js
  * 工具类
- * by bang
+ * @author gxiaobang
  */
 
 // 无操作
