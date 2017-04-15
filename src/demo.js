@@ -2,7 +2,7 @@
  * 测试日历
  */
 
-import { DatePicker } from './datePicker';
+import { DatePicker } from './date-picker';
 
 new DatePicker('#datePicker', { fmt: 'yyyy-MM-dd' })
 	.on('picked', function() {
